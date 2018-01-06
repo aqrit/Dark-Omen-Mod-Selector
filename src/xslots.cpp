@@ -49,12 +49,12 @@ namespace xslots
 	const DWORD X_BANNER_FIRST =	460; // BT
 	const DWORD X_BANNER_LAST =		559; // BT
 	const DWORD X_PORTRAIT_FIRST =	560; // PT
-	const DWORD X_PORTRAIT_LAST =	659; // PT
-	SPRITE_SLOT SpriteTable[ 660 ]; // replaces table at 004CEB50
+	const DWORD X_PORTRAIT_LAST =	752; // PT
+	SPRITE_SLOT SpriteTable[ 753 ]; // replaces table at 004CEB50
 	WORD offset_table[ 460 ]; // replaces the table at 004EBC88 
 	void* Loaded_Sprite_Array[ 660 ]; // replaces the dynamically allocated array pointed to by dword_526D24 
 	void* Loaded_Banner_Array[ 660 ]; // replaces the dynamically allocated array pointed to by ...
-	WORD Loaded_Portrait_Array[ 128 ]; // replaces the dynamically allocated array pointed to by dword_00533B54
+	WORD Loaded_Portrait_Array[ 256 ]; // replaces the dynamically allocated array pointed to by dword_00533B54
 	void* heads_db;
 
 	const DWORD X_NAME_FIRST = 80;
@@ -94,7 +94,6 @@ namespace xslots
 
 	void PortraitInit(){ // replaces sub_41EB40
 		// init new portraits in sprite table
-		// note: game crashes for id > 0x7F
 		int id = 0x3F; // entry index in heads.db
 		for( int i = X_PORTRAIT_FIRST; i <= X_PORTRAIT_LAST; i++ ){
 			SpriteTable[ i ].loaded_index = id++;
@@ -420,8 +419,10 @@ namespace xslots
 		HOOK_CALL( &ReferencedPortraits, 0x00401E21 );
 		HOOK_CALL( PortraitShutdown, 0x0042A3C6 );
 		HOOK_CALL( PortraitInit, 0x00428A1F );
-		*((BYTE*)0x0041EE08) = 0x7F; // override max head_db entries (0x3F)
-		*((BYTE*)0x0041EC9B) = 0x7F; // override max head_db entries (0x3F)
+		*((DWORD*)0x0041EE07) = 0x840FFF3C; // max head_db id check, keep 0xFF as invalid (no portrait)
+		*((BYTE*)0x0041EC9B) = 0xFF; // override head_db entries id max (0x3F)
+		*((BYTE*)0x0041FBD0) = 0xB6; // change movsx to movzx for head_db entry id
+		*((BYTE*)0x0041FA70) = 0xB6; // change movsx to movzx for head_db entry id	
 		WRITE_JMP( GetType, 0x004184B0 );
 		WRITE_JMP( AddRef, 0x004184D0 );
 		WRITE_JMP( Release, 0x004184F0 );
